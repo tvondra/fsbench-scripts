@@ -3,40 +3,39 @@ for m in i5 xeon; do
 
 	for run in `ls $m | grep run-2`; do
 
-		echo "* $run"
-		echo ""
-		echo "  * tps: [eps]($m/$run/tps.eps) [svg]($m/$run/tps.svg)"
-		echo "  * latencies: [eps]($m/$run/latencies.eps) [svg]($m/$run/latencies.svg)"
+		echo "$m / $run"
+		echo "========================="
 
-		latencies=""
-		tps=""
+		echo "tps: [eps]($m/$run/tps.eps) [svg]($m/$run/tps.svg)"
+		echo "![$m / $run]($m/$run/tps.svg)"
+
+		echo ""
+
+		echo "latencies: [eps]($m/$run/latencies.eps) [svg]($m/$run/latencies.svg)"
+		echo "![$m / $run]($m/$run/latencies.svg)"
+
+		echo ""
+
+		latencies="|latency|"
+		tps="|tps|"
+		header="| |"
+		hline="|---|"
 
 		for fs in btrfs btrfs-no-compress ext4 xfs zfs zfs-no-compress zfs-no-fpw; do
 
 			if [ -f "$m/$run/tps-$fs.eps" ]; then
-				latencies="$latencies [$fs]($m/$run/latencies-$fs.eps)"
-				tps="$tps [$fs]($m/$run/tps-$fs.eps)"
+				header="$header $fs |"
+				hline="$hline---|"
+				latencies="$latencies [eps]($m/$run/latencies-$fs.eps) [svg]($m/$run/latencies-$fs.svg) |"
+				tps="$tps [eps]($m/$run/tps-$fs.eps) [svg]($m/$run/tps-$fs.svg) |"
 			fi
 
 		done
 
-		echo "  * latencies (eps): $latencies"
-		echo "  * tps (eps): $tps"
-
-		latencies=""
-		tps=""
-
-		for fs in btrfs btrfs-no-compress ext4 xfs zfs zfs-no-compress zfs-no-fpw; do
-
-			if [ -f "$m/$run/tps-$fs.svg" ]; then
-				latencies="$latencies [$fs]($m/$run/latencies-$fs.svg)"
-				tps="$tps [$fs]($m/$run/tps-$fs.svg)"
-			fi
-
-		done
-
-		echo "  * latencies (svg): $latencies"
-		echo "  * tps (svg): $tps"
+		echo $header
+		echo $hline
+		echo $tps
+		echo $latencies
 
 	echo ""
 
