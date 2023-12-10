@@ -15,8 +15,23 @@ scales = []
 clients = []
 modes = ['rw', 'ro']
 
+max_tps = None
+max_latency = None
 
-def build_chart(chart_format, chart_type, file_subname, filesystems, clients, scales, modes):
+if len(sys.argv) >= 3:
+	max_tps = sys.argv[2].split(':')
+	max_tps = [int(v) for v in max_tps]
+
+if len(sys.argv) >= 4:
+	max_latency = sys.argv[3].split(':')
+	max_latency = [int(v) for v in max_latency]
+
+# xeon tps [100000:100000:50000:400000]
+# xeon latency [10000000:100000000:1000000000:100000]
+# i5 tps [25000, 25000:20000:100000]
+# i5 latency [1000000:100000000:100000000:100000]
+
+def build_chart(chart_format, chart_type, file_subname, filesystems, clients, scales, modes, max_tps_values, max_latency_values):
 
 	file_name = chart_type
 
@@ -68,10 +83,22 @@ def build_chart(chart_format, chart_type, file_subname, filesystems, clients, sc
 							max_latency = max(max_latency, float(line.split(' ')[7]))
 
 				if chart_type.startswith('tps'):
+
+					if m == 'rw':
+						max_tps = max_tps_values[scales.index(s)]
+					else:
+						max_tps = max_tps_values[len(scales)]
+
 					if max_tps != 0.0:
 						template += 'set yrange [0:%d]' % (int(max_tps),)
 						template += '\n'
 				else:
+
+					if m == 'rw':
+						max_latency = max_latency_values[scales.index(s)]
+					else:
+						max_latency = max_latency_values[len(scales)]
+
 					if max_latency != 0.0:
 
 						min_latency = 10 ** math.floor(math.log(min_latency) / math.log(10.0))
@@ -126,9 +153,9 @@ if __name__ == '__main__':
 
 	for chart_type in [ 'latencies-short', 'latencies', 'tps-short', 'tps' ]:
 
-		build_chart('png', chart_type, None, filesystems, clients, scales, modes)
-		build_chart('svg', chart_type, None, filesystems, clients, scales, modes)
+		build_chart('png', chart_type, None, filesystems, clients, scales, modes, max_tps, max_latency)
+		build_chart('svg', chart_type, None, filesystems, clients, scales, modes, max_tps, max_latency)
 
 		for fs in filesystems:
-			build_chart('png', chart_type, fs, [fs], clients, scales, modes)
-			build_chart('svg', chart_type, fs, [fs], clients, scales, modes)
+			build_chart('png', chart_type, fs, [fs], clients, scales, modes, max_tps, max_latency)
+			build_chart('svg', chart_type, fs, [fs], clients, scales, modes, max_tps, max_latency)
